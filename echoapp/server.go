@@ -2,7 +2,6 @@ package main
 
 import (
 	"io"
-	"log"
 	"net/http"
 	"os"
 
@@ -16,7 +15,7 @@ func main() {
 	})
 	e.GET("/users/:id", getUser)
 	e.GET("/show", show)
-	e.POST("/save", saveForm)
+	e.POST("/save", saveImage)
 	e.Logger.Fatal(e.Start(":1323"))
 }
 
@@ -37,13 +36,12 @@ func save(c echo.Context) error {
 	return c.String(http.StatusOK, "name: "+name+", email: "+email)
 }
 
-func saveForm(c echo.Context) error {
+func saveImage(c echo.Context) error {
 	name := c.FormValue("name")
 	avatar, err := c.FormFile("avatar")
 	if err != nil {
 		return err
 	}
-	log.Print("save commig")
 
 	// source
 	src, err := avatar.Open()
