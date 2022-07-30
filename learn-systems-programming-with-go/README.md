@@ -1,3 +1,3 @@
 # Learn Systems Programming with Go
 
-"Goならわかるシステムプログラミング"の実装集です
+"Goならわかるシステムプログラミング"の実装
