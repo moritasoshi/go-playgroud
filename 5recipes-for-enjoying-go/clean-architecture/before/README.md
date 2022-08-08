@@ -28,7 +28,7 @@ set -x POSTGRESQL_URL 'postgres://wwgt-diary:wwgt-diary@0.0.0.0:5435/wwgt-diary?
 # Run migrations
 migrate -database $POSTGRESQL_URL -path migrations up
 
-# Create migrations
+# Create new migration files
 migrate create -ext sql -dir migrations -seq MIGRATION_FILE_NAME
 
 # Run down migrations
