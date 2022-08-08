@@ -3,6 +3,7 @@ package main
 import (
 	"before/config"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -55,6 +56,26 @@ func NewServer(handler http.Handler) *http.Server {
 	}
 }
 
+func addDiary(db *sql.DB) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var input DiaryRequest
+		fmt.Printf("input: %v\n", input)
+		fmt.Printf("&input: %v\n", &input)
+		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		_, err := db.Exec(
+			`insert into diary(title, description) values ($1,$2)`, input.Title, input.Description,
+		)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	})
+}
+
 func main() {
 	conn, err := NewDB()
 	if err != nil {
@@ -63,6 +84,8 @@ func main() {
 	defer conn.Close()
 
 	r := mux.NewRouter().PathPrefix("/api").Subrouter()
+
+	r.Handle("/diary", addDiary(conn)).Methods("POST")
 
 	srv := NewServer(r)
 
