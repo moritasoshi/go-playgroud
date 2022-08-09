@@ -57,6 +57,13 @@ func NewServer(handler http.Handler) *http.Server {
 	}
 }
 
+func handleError(w http.ResponseWriter, err error) {
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+}
+
 func addDiary(db *sql.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var input DiaryRequest
@@ -101,6 +108,16 @@ func editDiary(db *sql.DB) http.Handler {
 	})
 }
 
+func deleteDiary(db *sql.DB) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		ID, err := strconv.Atoi(vars["id"])
+		handleError(w, err)
+		_, err = db.Exec(`delete from diary where id = $1`, ID)
+		handleError(w, err)
+	})
+}
+
 func main() {
 	conn, err := NewDB()
 	if err != nil {
@@ -112,6 +129,7 @@ func main() {
 
 	r.Handle("/diary", addDiary(conn)).Methods("POST")
 	r.Handle("/diary/{id}", editDiary(conn)).Methods("PUT")
+	r.Handle("/diary/{id}", deleteDiary(conn)).Methods("DELETE")
 
 	srv := NewServer(r)
 
