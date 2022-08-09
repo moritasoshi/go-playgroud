@@ -118,6 +118,25 @@ func deleteDiary(db *sql.DB) http.Handler {
 	})
 }
 
+func getDiary(db *sql.DB) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		ID, err := strconv.Atoi(vars["id"])
+		handleError(w, err)
+
+		var diary Diary
+
+		rows := db.QueryRow(`select id, title, description from diary where id = $1`, ID)
+		if err := rows.Scan(
+			&diary.ID, &diary.Title, &diary.Description,
+		); err != nil {
+			handleError(w, err)
+		}
+		fmt.Fprint(w, diary)
+	})
+
+}
+
 func main() {
 	conn, err := NewDB()
 	if err != nil {
@@ -128,6 +147,7 @@ func main() {
 	r := mux.NewRouter().PathPrefix("/api").Subrouter()
 
 	r.Handle("/diary", addDiary(conn)).Methods("POST")
+	r.Handle("/diary/{id}", getDiary(conn)).Methods("GET")
 	r.Handle("/diary/{id}", editDiary(conn)).Methods("PUT")
 	r.Handle("/diary/{id}", deleteDiary(conn)).Methods("DELETE")
 
