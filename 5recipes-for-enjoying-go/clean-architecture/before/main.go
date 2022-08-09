@@ -58,10 +58,7 @@ func NewServer(handler http.Handler) *http.Server {
 }
 
 func handleError(w http.ResponseWriter, err error) {
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	http.Error(w, err.Error(), http.StatusBadRequest)
 }
 
 func addDiary(db *sql.DB) http.Handler {
@@ -134,7 +131,37 @@ func getDiary(db *sql.DB) http.Handler {
 		}
 		fmt.Fprint(w, diary)
 	})
+}
 
+func getDiaries(db *sql.DB) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rows, err := db.Query(`select id, title, description from diary`)
+		if err != nil {
+			handleError(w, err)
+			return
+		}
+
+		defer rows.Close()
+
+		var diaries []Diary
+		for rows.Next() {
+			var diary Diary
+			if err := rows.Scan(&diary.ID, &diary.Title, &diary.Description); err != nil {
+				handleError(w, err)
+				return
+			}
+			diaries = append(diaries, diary)
+		}
+
+		json, err := json.Marshal(diaries)
+		if err != nil {
+			handleError(w, err)
+			return
+		}
+
+		fmt.Fprint(w, string(json))
+
+	})
 }
 
 func main() {
@@ -150,6 +177,7 @@ func main() {
 	r.Handle("/diary/{id}", getDiary(conn)).Methods("GET")
 	r.Handle("/diary/{id}", editDiary(conn)).Methods("PUT")
 	r.Handle("/diary/{id}", deleteDiary(conn)).Methods("DELETE")
+	r.Handle("/diaries", getDiaries(conn)).Methods("GET")
 
 	srv := NewServer(r)
 
