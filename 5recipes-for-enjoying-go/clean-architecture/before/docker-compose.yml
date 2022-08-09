@@ -14,7 +14,7 @@ services:
       - $PWD/docker/db/data:/var/lib/postgresql/data
   server:
     container_name: wwgt-diary-server
-    command: 'sh ./dev-runscript.sh'
+    command: 'air'
     build:
       context: .
       dockerfile: docker/server/Dockerfile
@@ -26,3 +26,5 @@ services:
       - default
     ports:
       - '8080:8080'
+    volumes:
+      - $PWD/:/wwgt-diary-server/

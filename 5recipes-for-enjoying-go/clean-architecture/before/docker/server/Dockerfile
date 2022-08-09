@@ -1,12 +1,10 @@
-FROM golang:1.15
+FROM golang:1.18
 
 WORKDIR /wwgt-diary-server
-COPY go.mod go.sum ./
-RUN go mod download
 COPY . .
+RUN go mod tidy
+RUN go install github.com/cosmtrek/air@latest
 
-RUN go build -o main .
 EXPOSE 8080
 
-COPY dev-runscript.sh ./
-CMD [ "sh", "./dev-runscript.sh" ]
+CMD [ "air" ]
