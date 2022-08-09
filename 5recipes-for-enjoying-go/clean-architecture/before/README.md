@@ -3,8 +3,10 @@
 ## Starting DB and Server
 
 ```shell
-docker-compose up
+docker-compose up --build
 ```
+
+- hot-reload supported with [air](https://github.com/cosmtrek/air)
 
 ## Migration
 
@@ -23,7 +25,10 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@lat
 ### cli usage
 
 ```shell
+# for fish-shell
 set -x POSTGRESQL_URL 'postgres://wwgt-diary:wwgt-diary@0.0.0.0:5435/wwgt-diary?sslmode=disable'
+# for bash
+export POSTGRESQL_URL='postgres://wwgt-diary:wwgt-diary@0.0.0.0:5435/wwgt-diary?sslmode=disable'
 
 # Run migrations
 migrate -database $POSTGRESQL_URL -path migrations up
