@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -59,8 +60,6 @@ func NewServer(handler http.Handler) *http.Server {
 func addDiary(db *sql.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var input DiaryRequest
-		fmt.Printf("input: %v\n", input)
-		fmt.Printf("&input: %v\n", &input)
 		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -76,6 +75,32 @@ func addDiary(db *sql.DB) http.Handler {
 	})
 }
 
+func editDiary(db *sql.DB) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		ID, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		var input DiaryRequest
+		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		_, err = db.Exec(`update diary set title = $1, description = $2 where id = $3`,
+			input.Title, input.Description, ID)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+	})
+}
+
 func main() {
 	conn, err := NewDB()
 	if err != nil {
@@ -86,6 +111,7 @@ func main() {
 	r := mux.NewRouter().PathPrefix("/api").Subrouter()
 
 	r.Handle("/diary", addDiary(conn)).Methods("POST")
+	r.Handle("/diary/{id}", editDiary(conn)).Methods("PUT")
 
 	srv := NewServer(r)
 
