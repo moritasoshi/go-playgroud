@@ -1,5 +1,12 @@
 # after
 
+## Clean Architecture
+
+- Adapter:   リクエストをビジネスロジックに渡すための処理を行う
+- UseCase:   ビジネスロジック
+- Presenter: ビジネスロジックの結果を外部向けに返却する
+
+
 ## Starting DB and Server
 
 ```shell
