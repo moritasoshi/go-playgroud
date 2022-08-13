@@ -27,8 +27,6 @@ func NewCreateDiaryPresenter(output *diary.CreateDiaryOutputPort) *createDiaryRe
 	return &createDiaryResponse{mapDiaryToSimpleView(output.Diary)}
 }
 
-type listDiaryResponse struct {
-	Diaries []*simpleDiaryView `json:"diaries"`
+func NewGetDiaryPresenter(output *diary.GetDiaryOutputPort) createDiaryResponse {
+	return createDiaryResponse{mapDiaryToSimpleView(output.Diary)}
 }
-
-// func NewListDIaryPresenter(output *diary.GetDiaryOutputPort)

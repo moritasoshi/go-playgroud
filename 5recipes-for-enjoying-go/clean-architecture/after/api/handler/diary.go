@@ -38,3 +38,32 @@ func NewCreateDiaryHandler(du *diary.CreateDiaryUseCase) http.Handler {
 
 	})
 }
+
+func NewGetDiaryHandler(du *diary.GetDiaryUseCase) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Adapter
+		input, err := adapter.NewGetDiaryInputPortFromRequest(r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// UseCase
+		output, err := du.Execute(r.Context(), input)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+		// Presenter
+		err = json.NewEncoder(w).Encode(presenter.NewGetDiaryPresenter(output))
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	})
+}

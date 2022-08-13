@@ -3,8 +3,11 @@ package adapter
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"after/usecase/diary"
+
+	"github.com/gorilla/mux"
 )
 
 type createDiaryRequestBody struct {
@@ -21,4 +24,16 @@ func NewCreateDiaryInputPortFromRequest(r *http.Request) (*diary.CreateDiaryInpu
 			Title:       input.Title,
 			Description: input.Description},
 		nil
+}
+
+func NewGetDiaryInputPortFromRequest(r *http.Request) (*diary.GetDiaryInputPort, error) {
+	vars := mux.Vars(r)
+	ID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		return nil, err
+	}
+
+	return &diary.GetDiaryInputPort{
+		ID: ID,
+	}, nil
 }

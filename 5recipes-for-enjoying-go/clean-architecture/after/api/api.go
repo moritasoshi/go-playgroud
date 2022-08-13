@@ -20,5 +20,6 @@ func buildProjectRoutes(r *mux.Router, db *sql.DB) {
 	dr := repository.NewDiaryRepository(db)
 
 	r.Handle("/diary", handler.NewCreateDiaryHandler(diary.NewCreateDiaryUseCase(dr))).Methods("POST")
+	r.Handle("/diary/{id}", handler.NewGetDiaryHandler(diary.NewGetDiaryUseCase(dr))).Methods("GET")
 
 }
